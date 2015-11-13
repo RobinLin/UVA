@@ -1,3 +1,4 @@
+//sample rate = 100 Hz
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +21,7 @@ int status3 = 0;
 double r[100];
 int temp_1[15];
 
-
+//Low threshold a < 0.4g
 int section1(double data)
 {
     if( (data < (0.4*512*512)) && fg1 == false && fg2 == false && fg3 == false) {
@@ -52,9 +53,9 @@ int main()
 
         printf("X:%d, Y:%d, Z:%d, id:%d, status:%d, status2:%d, status3:%d, fg1:%d, fg2:%d, fg3:%d\r\n",real_acc[0], real_acc[1], real_acc[2], n, status, status2, status3, fg1, fg2, fg3);
 
-        section1(a); // 條件一 a < 0.4g
+        section1(a);
 
-        if(fg3) {    // 條件三:數300次，a = 1g
+        if(fg3) {    // after "fg2" wait 3 sec and check if a = 1g
             temp_1[i] = a;
             i++;
             if(i == 15) {
@@ -79,12 +80,11 @@ int main()
             }
         }
 
-        if(fg2) {    // 條件三:數15次，a = 1g
+        if(fg2) {    // when pass "fg1" count 150 msec and check if a = 1g
             temp_1[i] = a;
             i++;
             if(temp_1[14] == 512*512) {
                 printf("..........success -> go to rule4..........\r\n");
-                //fg1 = false;
                 fg2 = false;
                 fg3 = true;
                 status3 = n;
@@ -92,7 +92,6 @@ int main()
             }
             if((n-(status2+15)) == 0) {
                 printf("----------fail -> go to rule4----------\r\n");
-                //fg1 = false;
                 fg2 = false;
                 fg3 = true;
                 status3 = n;
@@ -100,7 +99,7 @@ int main()
             }
         }
 
-        if(fg1) {   // 條件二:15次內任一 a > 3g
+        if(fg1) {   // when pass the "section1" count 150 msec, and check if a > 3g
             temp_1[i] = a;
             i++;
             for(j = 0; j < 15; j++) {
